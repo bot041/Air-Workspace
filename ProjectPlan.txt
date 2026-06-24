@@ -1,457 +1,136 @@
-
-AIRSCRIPT MVP v2.2 - PROJECTPLAN.txt
-====================================
+AirScript MVP - PROJECT PLAN (Current)
+=====================================
 
 PROJECT OVERVIEW
 ----------------
-AirScript is a desktop AR-style gesture workspace that uses a webcam and computer vision to let users create, manipulate, organize, and transfer hand-drawn objects without touching a mouse, keyboard, or screen.
+AirScript is a desktop, fullscreen, gesture-controlled AR workspace for Windows.
+It uses a webcam and computer vision to let users draw, move, and erase digital
+ink in the air without touching a mouse, keyboard, or screen.
 
 CORE VISION
 -----------
-- Live webcam feed visible at all times.
+- Live mirrored webcam feed visible at all times.
 - Draw in the air using hand gestures.
-- Preserve exactly what the user draws.
-- No OCR.
-- No handwriting recognition.
-- No AI interpretation of drawings.
+- Preserve exactly what the user draws (stroke-level fidelity).
+- No OCR or handwriting recognition.
 - Single-hand interaction.
 - Gesture-first workflow.
-- Workspace and Output Tray organization system.
+- Futuristic, glowing UI panels.
 
-PLATFORM STRATEGY
------------------
-MVP:
-- Windows Desktop Application
-
-Future:
-- Web Version
+CURRENT FEATURES
+----------------
+1. Fullscreen workspace with mirrored webcam preview.
+2. Real-time hand tracking via MediaPipe Hands.
+3. Gesture-based drawing, navigation, selection, dragging, and erasing.
+4. Six-color palette (green, red, neon, blue, orange, white) selectable by
+   index-finger dwell or number keys 1-6.
+5. Four brush modes: Ink, Neon, Marker, Highlighter.
+6. Adjustable stroke thickness (+ / - keys).
+7. Existing objects keep their color/brush/thickness when tools change.
+8. Glowing, futuristic UI panels for colors and brushes.
+9. Live gesture hint overlay.
+10. FPS counter and status messages.
+11. Smoke test and synthetic gesture unit tests.
 
 TECH STACK
 ----------
-- Python
-- OpenCV
-- MediaPipe Hands
-- NumPy
+- Python 3.10+
 - PyQt6
+- OpenCV
+- MediaPipe Hands (Task API)
+- NumPy
 
 GESTURE SYSTEM
 --------------
+| Gesture | Hand Shape | Action |
+|---------|------------|--------|
+| Draw | Index finger only | Draw strokes |
+| Navigate | Index + middle extended | Move without drawing |
+| Select | Pinch (thumb + index) | Select top object under cursor |
+| Drag | Pinch + move | Move selected object |
+| Drop | Release pinch | Drop object |
+| Partial Erase | Open palm swipe | Remove touched stroke segments |
+| Delete Object | Open palm hold 1 sec | Delete entire object under cursor |
 
-1. DRAW
-Gesture:
-- Index Finger Only (☝️)
+The cursor strictly follows the index fingertip and is mirrored so the workspace
+feels like a mirror.
 
-Action:
-- Draw strokes in real-time.
-
-2. NAVIGATION
-Gesture:
-- Index + Middle Finger (✌️)
-
-Action:
-- Move hand without drawing.
-- Reposition hand safely.
-
-3. SELECT
-Gesture:
-- Pinch (🤏)
-
-Action:
-- Select object.
-
-4. DRAG
-Gesture:
-- Pinch + Move
-
-Action:
-- Drag selected object.
-
-5. DROP
-Gesture:
-- Release Pinch
-
-Action:
-- Drop object at current position.
-
-6. PARTIAL ERASE
-Gesture:
-- Open Palm Swipe (✋)
-
-Action:
-- Remove touched stroke segments.
-
-7. DELETE OBJECT
-Gesture:
-- Open Palm Hold for 1 Second
-
-Action:
-- Delete entire object.
-
-DRAWING RULES
--------------
-- Fixed stroke thickness.
-- Multi-stroke objects supported.
-- Exact stroke preservation.
-- Stroke smoothing enabled.
-- Drawings can be:
-  * Text
-  * Signatures
-  * Diagrams
-  * Symbols
-  * Sketches
-  * Equations
-
-NO OCR / RECOGNITION
+COLOR / BRUSH SYSTEM
 --------------------
-- No OCR.
-- No handwriting recognition.
-- No text classification.
-- No symbol recognition.
-- No AI conversion.
+- Colors and brushes are selected from glowing side panels.
+- Color/brush changes immediately apply only to new drawing.
+- In-progress strokes are finalized first so they keep their original style.
+- Brushes support opacity (Marker, Highlighter) and glow (Ink, Neon).
 
-OBJECT CREATION
----------------
-Workflow:
-
-DRAWING
-  ↓
-CREATE STROKES
-  ↓
-1 SECOND INACTIVITY
-  ↓
-FINALIZE OBJECT
-  ↓
-IMMEDIATELY INTERACTIVE
-
-MULTI-STROKE OBJECTS
---------------------
-A single object may contain multiple strokes.
-
-Example:
-HELLO
-- H = multiple strokes
-- E = multiple strokes
-- L = multiple strokes
-- O = one stroke
-
-All strokes belong to one object until:
-- 1 second inactivity occurs.
-
-OBJECT DATA STRUCTURE
----------------------
-
-StrokeObject
-{
-    object_id
-    strokes[]
-    position
-    bounding_box
-    z_index
-    selected
-    panel_location
-    timestamp
-    theme
-}
-
-SELECTION SYSTEM
-----------------
-- Pinch inside object bounds.
-- Top-most object gets selected.
-- Selected object glows.
-- No bounding box.
-- No resize handles.
-
-OBJECT OVERLAP RULES
---------------------
-- Objects can overlap.
-- Objects can stack.
-- Top-most object wins selection.
-- Dragged object temporarily moves to highest z-index.
-
-DRAGGING BEHAVIOR
------------------
-- Natural grab offset.
-
-Example:
-Object position = (300, 200)
-Pinch point = (340, 220)
-
-Offset = (+40, +20)
-
-During drag:
-- Maintain offset.
-- No snapping.
-- No jumping.
-
-ERASING SYSTEM
---------------
-
-Partial Erase:
-- Palm swipe removes touched stroke segments.
-
-Full Delete:
-- Palm hold for 1 second over object.
-- Entire object deleted.
-
-Visual Feedback:
-- Red glow before deletion.
-
-UI LAYOUT
----------
-
-+------------------------------------------------------+
-|                                                      |
-|                                                      |
-|                WORKSPACE AREA                        |
-|         (Live Webcam + Drawings + Objects)           |
-|                                                      |
-+------------------------------------------------------+
-|                    OUTPUT TRAY                       |
-|                                                      |
-| [Obj1] [Obj2] [Obj3] [Obj4] [Obj5] ...              |
-|                                                      |
-+------------------------------------------------------+
-
-WORKSPACE
----------
-Functions:
-- Draw
-- Edit
-- Rearrange
-- Select
-- Delete
-- Transfer
-
-OUTPUT TRAY
------------
-Functions:
-- Store multiple objects
-- Editable objects
-- Reorder objects
-- Move objects back to workspace
-- Preserve exact stroke data
-
-TRANSFER WORKFLOW
------------------
-Create Object
-    ↓
-Pinch Select
-    ↓
-Drag
-    ↓
-Drop Into Output Tray
-    ↓
-Stored
-
-Objects can be moved back into workspace.
-
-AR VISUALIZATION
-----------------
-
-Rendering Order:
-
-UI Layer
-    ↓
-Stroke Objects
-    ↓
-Effects
-    ↓
-Live Webcam Feed
-
-THEME SYSTEM
+ARCHITECTURE
 ------------
+Camera -> Hand Tracker -> Gesture Detector -> State Machine -> Object Manager -> Renderer -> Workspace UI
 
-Theme 1: Simple Ink
-- Fixed-width strokes
-- Clean rendering
-- High performance
-
-Theme 2: Neon AR
-- Glowing strokes
-- Enhanced glow effects
-- Futuristic appearance
-
-Theme Switching:
-- Runtime switching
-- Non-destructive
-- Updates all objects automatically
-
-SESSION MANAGEMENT
-------------------
-Runtime Only.
-
-Application Start:
-- Empty workspace
-- Empty output tray
-
-Application Close:
-- Everything discarded
-
-Excluded:
-- Save
-- Load
-- Auto-save
-- Cloud sync
-
-STATE MACHINE
--------------
-
-IDLE
- │
- ▼
-NAVIGATION
- │
- ▼
-DRAWING
- │
- ▼
-OBJECT_FINALIZED
- │
- ▼
-SELECTED
- │
- ▼
-DRAGGING
- │
- ├──> WORKSPACE
- │
- └──> OUTPUT_TRAY
-
-CORE ARCHITECTURE
------------------
-
-Camera
-   ↓
-Hand Tracker
-   ↓
-Gesture Detector
-   ↓
-State Machine
-   ↓
-Object Manager
-   ↓
-Renderer
-   ↓
-Workspace / Output Tray
-
-RECOMMENDED PROJECT STRUCTURE
------------------------------
-
-AirScript/
-
-docs/
-├── ProjectPlan.txt
-├── architecture.md
-├── gesture_spec.md
-├── requirements.md
-
-src/
-├── camera/
-│   └── webcam.py
-├── tracking/
-│   ├── hand_tracker.py
-│   └── gesture_detector.py
-├── drawing/
-│   ├── canvas.py
-│   ├── stroke.py
-│   └── smoother.py
-├── objects/
-│   ├── stroke_object.py
-│   ├── object_manager.py
-│   └── z_order.py
-├── selection/
-│   └── selection_manager.py
-├── eraser/
-│   └── eraser.py
-├── panels/
-│   ├── workspace.py
-│   └── output_tray.py
-├── ui/
-│   ├── renderer.py
-│   ├── overlays.py
-│   └── glow_effect.py
-├── core/
-│   ├── state_machine.py
-│   ├── app_controller.py
-│   └── event_bus.py
-└── main.py
-
-CORE CLASSES
-------------
+Core classes:
 - HandTracker
-- GestureDetector
-- Stroke
-- StrokeObject
+- GestureDetector / GestureSmoother
+- Stroke / StrokeObject
 - ObjectManager
 - SelectionManager
 - Eraser
-- Renderer
+- ColorPalette / BrushManager
 - Workspace
-- OutputTray
-- StateMachine
 - AppController
+
+PROJECT STRUCTURE
+-----------------
+AirWorkspace Project/
+├── docs/
+│   ├── architecture.md
+│   ├── gesture_spec.md
+│   ├── requirements.md
+│   └── demo.png
+├── src/
+│   ├── camera/
+│   ├── core/
+│   ├── drawing/
+│   ├── eraser/
+│   ├── models/
+│   ├── objects/
+│   ├── panels/
+│   ├── selection/
+│   ├── tracking/
+│   ├── ui/
+│   └── main.py
+├── tests/
+│   └── test_gesture_detector.py
+├── .gitignore
+├── ProjectPlan.txt
+├── README.md
+└── requirements.txt
+
+CONTROLS
+--------
+Gestures:
+- Index finger      -> Draw
+- Index + middle    -> Navigate
+- Thumb + index     -> Select / Drag
+- Open palm         -> Erase / hold to delete
+
+Keyboard:
+- 1-6               -> Select color
+- F1-F4             -> Select brush (Ink/Neon/Marker/Highlighter)
+- + / -             -> Increase / decrease thickness
+- Esc               -> Quit
 
 PERFORMANCE TARGETS
 -------------------
-- 25–30 FPS minimum
-- Smooth interaction
-- Low latency gesture response
-- Stable hand tracking
-- Real-time rendering
+- 25-30 FPS minimum.
+- 640x480 hand tracking input for edge accuracy.
+- Smooth real-time rendering.
 
-MVP DEVELOPMENT ROADMAP
------------------------
-
-Sprint 1
-- Webcam feed
-- MediaPipe integration
-- Hand tracking
-
-Sprint 2
-- Drawing engine
-- Navigation mode
-- Stroke smoothing
-
-Sprint 3
-- Object creation
-- Object finalization
-- Object manager
-
-Sprint 4
-- Selection
-- Glow effects
-- Dragging
-
-Sprint 5
-- Output tray
-- Transfer system
-- Return to workspace
-
-Sprint 6
-- Partial erase
-- Object deletion
-
-Sprint 7
-- Theme system
-- Neon mode
-- Optimization
-
-MVP SUCCESS CRITERIA
---------------------
-User can:
-
-1. Open webcam feed.
-2. Draw using index finger.
-3. Reposition using two fingers.
-4. Create multi-stroke objects.
-5. Auto-finalize after 1 second.
-6. Select with pinch.
-7. Drag naturally.
-8. Transfer to output tray.
-9. Return objects to workspace.
-10. Partially erase strokes.
-11. Delete objects.
-12. Switch themes.
-13. Maintain 25–30 FPS.
+ROADMAP
+-------
+- Save / load sessions and PNG export.
+- Undo / redo gestures.
+- Two-hand zoom / pan / rotate.
+- Shape recognition.
+- Sound / haptic feedback.
+- Cross-platform packaging.
 
 END OF PROJECT PLAN
