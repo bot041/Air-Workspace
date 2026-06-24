@@ -1,0 +1,457 @@
+
+AIRSCRIPT MVP v2.2 - PROJECTPLAN.txt
+====================================
+
+PROJECT OVERVIEW
+----------------
+AirScript is a desktop AR-style gesture workspace that uses a webcam and computer vision to let users create, manipulate, organize, and transfer hand-drawn objects without touching a mouse, keyboard, or screen.
+
+CORE VISION
+-----------
+- Live webcam feed visible at all times.
+- Draw in the air using hand gestures.
+- Preserve exactly what the user draws.
+- No OCR.
+- No handwriting recognition.
+- No AI interpretation of drawings.
+- Single-hand interaction.
+- Gesture-first workflow.
+- Workspace and Output Tray organization system.
+
+PLATFORM STRATEGY
+-----------------
+MVP:
+- Windows Desktop Application
+
+Future:
+- Web Version
+
+TECH STACK
+----------
+- Python
+- OpenCV
+- MediaPipe Hands
+- NumPy
+- PyQt6
+
+GESTURE SYSTEM
+--------------
+
+1. DRAW
+Gesture:
+- Index Finger Only (☝️)
+
+Action:
+- Draw strokes in real-time.
+
+2. NAVIGATION
+Gesture:
+- Index + Middle Finger (✌️)
+
+Action:
+- Move hand without drawing.
+- Reposition hand safely.
+
+3. SELECT
+Gesture:
+- Pinch (🤏)
+
+Action:
+- Select object.
+
+4. DRAG
+Gesture:
+- Pinch + Move
+
+Action:
+- Drag selected object.
+
+5. DROP
+Gesture:
+- Release Pinch
+
+Action:
+- Drop object at current position.
+
+6. PARTIAL ERASE
+Gesture:
+- Open Palm Swipe (✋)
+
+Action:
+- Remove touched stroke segments.
+
+7. DELETE OBJECT
+Gesture:
+- Open Palm Hold for 1 Second
+
+Action:
+- Delete entire object.
+
+DRAWING RULES
+-------------
+- Fixed stroke thickness.
+- Multi-stroke objects supported.
+- Exact stroke preservation.
+- Stroke smoothing enabled.
+- Drawings can be:
+  * Text
+  * Signatures
+  * Diagrams
+  * Symbols
+  * Sketches
+  * Equations
+
+NO OCR / RECOGNITION
+--------------------
+- No OCR.
+- No handwriting recognition.
+- No text classification.
+- No symbol recognition.
+- No AI conversion.
+
+OBJECT CREATION
+---------------
+Workflow:
+
+DRAWING
+  ↓
+CREATE STROKES
+  ↓
+1 SECOND INACTIVITY
+  ↓
+FINALIZE OBJECT
+  ↓
+IMMEDIATELY INTERACTIVE
+
+MULTI-STROKE OBJECTS
+--------------------
+A single object may contain multiple strokes.
+
+Example:
+HELLO
+- H = multiple strokes
+- E = multiple strokes
+- L = multiple strokes
+- O = one stroke
+
+All strokes belong to one object until:
+- 1 second inactivity occurs.
+
+OBJECT DATA STRUCTURE
+---------------------
+
+StrokeObject
+{
+    object_id
+    strokes[]
+    position
+    bounding_box
+    z_index
+    selected
+    panel_location
+    timestamp
+    theme
+}
+
+SELECTION SYSTEM
+----------------
+- Pinch inside object bounds.
+- Top-most object gets selected.
+- Selected object glows.
+- No bounding box.
+- No resize handles.
+
+OBJECT OVERLAP RULES
+--------------------
+- Objects can overlap.
+- Objects can stack.
+- Top-most object wins selection.
+- Dragged object temporarily moves to highest z-index.
+
+DRAGGING BEHAVIOR
+-----------------
+- Natural grab offset.
+
+Example:
+Object position = (300, 200)
+Pinch point = (340, 220)
+
+Offset = (+40, +20)
+
+During drag:
+- Maintain offset.
+- No snapping.
+- No jumping.
+
+ERASING SYSTEM
+--------------
+
+Partial Erase:
+- Palm swipe removes touched stroke segments.
+
+Full Delete:
+- Palm hold for 1 second over object.
+- Entire object deleted.
+
+Visual Feedback:
+- Red glow before deletion.
+
+UI LAYOUT
+---------
+
++------------------------------------------------------+
+|                                                      |
+|                                                      |
+|                WORKSPACE AREA                        |
+|         (Live Webcam + Drawings + Objects)           |
+|                                                      |
++------------------------------------------------------+
+|                    OUTPUT TRAY                       |
+|                                                      |
+| [Obj1] [Obj2] [Obj3] [Obj4] [Obj5] ...              |
+|                                                      |
++------------------------------------------------------+
+
+WORKSPACE
+---------
+Functions:
+- Draw
+- Edit
+- Rearrange
+- Select
+- Delete
+- Transfer
+
+OUTPUT TRAY
+-----------
+Functions:
+- Store multiple objects
+- Editable objects
+- Reorder objects
+- Move objects back to workspace
+- Preserve exact stroke data
+
+TRANSFER WORKFLOW
+-----------------
+Create Object
+    ↓
+Pinch Select
+    ↓
+Drag
+    ↓
+Drop Into Output Tray
+    ↓
+Stored
+
+Objects can be moved back into workspace.
+
+AR VISUALIZATION
+----------------
+
+Rendering Order:
+
+UI Layer
+    ↓
+Stroke Objects
+    ↓
+Effects
+    ↓
+Live Webcam Feed
+
+THEME SYSTEM
+------------
+
+Theme 1: Simple Ink
+- Fixed-width strokes
+- Clean rendering
+- High performance
+
+Theme 2: Neon AR
+- Glowing strokes
+- Enhanced glow effects
+- Futuristic appearance
+
+Theme Switching:
+- Runtime switching
+- Non-destructive
+- Updates all objects automatically
+
+SESSION MANAGEMENT
+------------------
+Runtime Only.
+
+Application Start:
+- Empty workspace
+- Empty output tray
+
+Application Close:
+- Everything discarded
+
+Excluded:
+- Save
+- Load
+- Auto-save
+- Cloud sync
+
+STATE MACHINE
+-------------
+
+IDLE
+ │
+ ▼
+NAVIGATION
+ │
+ ▼
+DRAWING
+ │
+ ▼
+OBJECT_FINALIZED
+ │
+ ▼
+SELECTED
+ │
+ ▼
+DRAGGING
+ │
+ ├──> WORKSPACE
+ │
+ └──> OUTPUT_TRAY
+
+CORE ARCHITECTURE
+-----------------
+
+Camera
+   ↓
+Hand Tracker
+   ↓
+Gesture Detector
+   ↓
+State Machine
+   ↓
+Object Manager
+   ↓
+Renderer
+   ↓
+Workspace / Output Tray
+
+RECOMMENDED PROJECT STRUCTURE
+-----------------------------
+
+AirScript/
+
+docs/
+├── ProjectPlan.txt
+├── architecture.md
+├── gesture_spec.md
+├── requirements.md
+
+src/
+├── camera/
+│   └── webcam.py
+├── tracking/
+│   ├── hand_tracker.py
+│   └── gesture_detector.py
+├── drawing/
+│   ├── canvas.py
+│   ├── stroke.py
+│   └── smoother.py
+├── objects/
+│   ├── stroke_object.py
+│   ├── object_manager.py
+│   └── z_order.py
+├── selection/
+│   └── selection_manager.py
+├── eraser/
+│   └── eraser.py
+├── panels/
+│   ├── workspace.py
+│   └── output_tray.py
+├── ui/
+│   ├── renderer.py
+│   ├── overlays.py
+│   └── glow_effect.py
+├── core/
+│   ├── state_machine.py
+│   ├── app_controller.py
+│   └── event_bus.py
+└── main.py
+
+CORE CLASSES
+------------
+- HandTracker
+- GestureDetector
+- Stroke
+- StrokeObject
+- ObjectManager
+- SelectionManager
+- Eraser
+- Renderer
+- Workspace
+- OutputTray
+- StateMachine
+- AppController
+
+PERFORMANCE TARGETS
+-------------------
+- 25–30 FPS minimum
+- Smooth interaction
+- Low latency gesture response
+- Stable hand tracking
+- Real-time rendering
+
+MVP DEVELOPMENT ROADMAP
+-----------------------
+
+Sprint 1
+- Webcam feed
+- MediaPipe integration
+- Hand tracking
+
+Sprint 2
+- Drawing engine
+- Navigation mode
+- Stroke smoothing
+
+Sprint 3
+- Object creation
+- Object finalization
+- Object manager
+
+Sprint 4
+- Selection
+- Glow effects
+- Dragging
+
+Sprint 5
+- Output tray
+- Transfer system
+- Return to workspace
+
+Sprint 6
+- Partial erase
+- Object deletion
+
+Sprint 7
+- Theme system
+- Neon mode
+- Optimization
+
+MVP SUCCESS CRITERIA
+--------------------
+User can:
+
+1. Open webcam feed.
+2. Draw using index finger.
+3. Reposition using two fingers.
+4. Create multi-stroke objects.
+5. Auto-finalize after 1 second.
+6. Select with pinch.
+7. Drag naturally.
+8. Transfer to output tray.
+9. Return objects to workspace.
+10. Partially erase strokes.
+11. Delete objects.
+12. Switch themes.
+13. Maintain 25–30 FPS.
+
+END OF PROJECT PLAN
