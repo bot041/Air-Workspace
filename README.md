@@ -257,3 +257,10 @@ This project is open-source. Feel free to fork, improve, and share.
 
 - [MediaPipe](https://mediapipe.dev/) for the hand-landmark model.
 - [OpenCV](https://opencv.org/) and [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) for the video and GUI stack.
+
+---
+
+## Author
+
+- **Bhuvan Kambad**
+- Email: [bkambad041@gmail.com](mailto:bkambad041@gmail.com)
