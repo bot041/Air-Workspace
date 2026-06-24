@@ -1,0 +1,127 @@
+AirScript / AirWorkspace - Core Concepts Cheat Sheet
+=====================================================
+
+This file explains the key concepts, libraries, and design patterns used in the
+project. It is useful for interviews and for anyone who wants to understand the
+project quickly.
+
+1. PYTHON & OOP
+---------------
+- Classes, objects, inheritance, encapsulation.
+- Each module is a class: HandTracker, GestureDetector, AppController, etc.
+- Static methods for helper utilities (e.g., distance calculations).
+- Class-level counters for unique IDs (StrokeObject._id_counter).
+
+2. PYQT6 / GUI FRAMEWORK
+------------------------
+- QApplication: the main event loop of a Qt GUI app.
+- QMainWindow: top-level window (fullscreen in this project).
+- QWidget & paintEvent(): custom drawing surface for the workspace.
+- QPainter: low-level 2D drawing (lines, ellipses, rectangles, text).
+- QImage / QPixmap: converting OpenCV frames (BGR) to Qt images.
+- QAction & shortcuts: menu items and keyboard bindings (Esc, 1-6, F1-F4, +/-).
+- QTimer: drives the per-frame update loop (~33 ms -> ~30 FPS).
+
+3. OPENCV
+---------
+- VideoCapture(index): opens the webcam.
+- cv2.flip(frame, 1): mirrors the frame horizontally.
+- cv2.resize(): scales frames before passing to MediaPipe.
+- BGR color format used by OpenCV; converted to RGB for MediaPipe and Qt.
+
+4. MEDIAPIPE HANDS
+------------------
+- HandLandmarker task: detects 21 3D landmarks of a hand.
+- Landmarks are normalized [0, 1] relative to the image size.
+- Key landmarks: wrist (0), thumb tip (4), index tip (8), middle tip (12),
+  ring tip (16), pinky tip (20).
+- RunningMode.VIDEO: optimized for continuous video streams.
+- Confidence thresholds tune detection/tracking sensitivity.
+
+5. COMPUTER VISION / MATH
+-------------------------
+- Euclidean distance (math.hypot) to measure finger extension and pinch.
+- Hand scale normalization: thresholds adapt to hand size/distance.
+- Mirroring: cursor x = 1 - landmark.x to align with mirrored preview.
+- Bounding boxes for hit testing and rendering.
+
+6. GESTURE RECOGNITION
+----------------------
+- Rule-based classifier: compares distances (tip vs. wrist, thumb vs. index).
+- Gestures: DRAW, NAVIGATE, PINCH, PALM, IDLE.
+- GestureSmoother: hysteresis filter to reduce flicker between similar poses.
+- Raw vs. smoothed gesture: raw for instant UI feedback, smoothed for state.
+
+7. STATE MACHINE
+----------------
+- Simple state machine: IDLE, DRAWING, OBJECT_OPEN, SELECTED, DRAGGING, ERASING.
+- Transitions are triggered by gestures.
+- Prevents invalid actions (e.g., drawing while dragging).
+
+8. DRAWING ENGINE
+-----------------
+- Stroke: a polyline list of (x, y) points.
+- StrokeObject: a collection of strokes forming one user object.
+- Smoother: moving-average filter to reduce cursor jitter while drawing.
+- Auto-finalization: object becomes interactive after 1 second of inactivity.
+
+9. RENDERING PIPELINE
+---------------------
+- Layer order: video feed -> finalized objects -> active object -> cursor -> UI.
+- QPainter coordinate transforms for tray thumbnails (not used in current UI).
+- Theme / BrushMode: stroke color, width, alpha, and glow rendered per object.
+- Alpha blending for translucent marker/highlighter brushes.
+
+10. OBJECT MANAGEMENT
+---------------------
+- ObjectManager stores workspace objects and assigns z-index.
+- bring_to_front(): raises z-index during selection/drag.
+- top_workspace_object_at(): hit testing respects z-order (top-most wins).
+- SelectionManager tracks selected object and natural drag offset.
+
+11. ERASER
+----------
+- Distance-based erasure: removes points within a radius.
+- Segment erasure: sweeps a line between previous and current cursor positions
+  to avoid gaps during fast swipes.
+- Hold-to-delete: palm hover over an object for 1 second triggers deletion.
+
+12. UI / UX CONCEPTS
+--------------------
+- Fullscreen immersive workspace.
+- Glassmorphism: translucent dark panels with neon borders.
+- Dwell selection: point and hold to select colors/brushes without a mouse.
+- Visual feedback: cursor color changes by gesture, progress rings, glows.
+
+13. SOFTWARE DESIGN PATTERNS
+----------------------------
+- MVC/MVP separation: Model (StrokeObject), View (Workspace), Controller
+  (AppController).
+- Observer pattern: QTimer drives updates; Qt signals/slots for menu actions.
+- Composition: AppController composes tracker, detector, manager, renderer, etc.
+
+14. VERSION CONTROL (GIT)
+-------------------------
+- Local repo + remote on GitHub.
+- .gitignore excludes venv, __pycache__, IDE files, logs.
+- Commit history tracks incremental features and bug fixes.
+
+15. TESTING
+-----------
+- Smoke test: launches app for 3 seconds to catch runtime errors.
+- Unit tests with synthetic landmarks verify gesture classification.
+- Compileall checks for syntax errors across the codebase.
+
+16. DEPLOYMENT / ENVIRONMENT
+----------------------------
+- Virtual environment isolates Python dependencies.
+- requirements.txt pins PyQt6, OpenCV, MediaPipe, NumPy.
+- Cross-platform instructions in README.md.
+
+17. PERFORMANCE
+---------------
+- Target 25-30 FPS.
+- Limit hand tracker input size to balance accuracy and speed.
+- Avoid heavy allocations inside the per-frame loop.
+
+END OF KNOWTHEPROJECT.TXT
