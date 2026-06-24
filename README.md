@@ -13,7 +13,11 @@ An open-source, gesture-controlled AR workspace for Windows. Draw, move, and era
 
 ![AirScript Demo](docs/demo.png)
 
-> Replace `docs/demo.png` with your own screenshot or screen-recording once you run the app.
+### Gesture writing in action
+
+![AirScript Writing Demo](docs/demo.gif)
+
+> The GIF above is a generated preview of AirScript's gesture-driven AR writing. Replace it with your own screen recording for a real-world demo.
 
 ---
 
